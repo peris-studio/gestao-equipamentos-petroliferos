@@ -1,0 +1,6 @@
+global using GestaoEquipamentosPetroliferos.Context;
+global using GestaoEquipamentosPetroliferos.Controllers;
+global using GestaoEquipamentosPetroliferos.Dtos;
+global using GestaoEquipamentosPetroliferos.Enums;
+global using GestaoEquipamentosPetroliferos.Mappings;
+global using GestaoEquipamentosPetroliferos.Models;
