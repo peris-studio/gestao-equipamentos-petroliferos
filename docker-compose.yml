@@ -1,0 +1,40 @@
+services:
+  gestao-equipamentos-petroliferos:
+    build:
+      context: .
+      dockerfile: src/GestaoEquipamentosPetroliferos/Dockerfile
+    image: gestao-ep:latest
+    container_name: gestao-equipamentos-petroliferos
+    ports:
+      - "8080:8080"
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=gestao-db;Username=user;Password=password"
+    depends_on:
+      - db
+    networks:
+      - gestao-network
+
+  db:
+    image: postgres
+    hostname: db # nome fixo do container dentro da rede
+    container_name: gestao-db
+    restart: always # serve para reiniciar automaticamente caso pare
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_DB: gestao-db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    networks:
+      - loja-network
+
+networks:
+  loja-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
