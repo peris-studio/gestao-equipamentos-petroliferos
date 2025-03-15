@@ -28,7 +28,16 @@ public class Alerta
                                  Guid id = default
                                  )
     {
-        var novoAlerta = new Alerta()
+        if (string.IsNullOrWhiteSpace(mensagem))
+            throw new ArgumentException("Mensagem obrigatória", nameof(mensagem));
+
+        if (equipamentoId == Guid.Empty)
+            throw new ArgumentException("Equipamento inválido", nameof(equipamentoId));
+
+        if (pecaId == Guid.Empty)
+            throw new ArgumentException("Peça inválida", nameof(pecaId));
+
+        return new Alerta()
         {
             Id = id == Guid.Empty ? Guid.NewGuid() : id,
             TipoAlerta = tipoAlerta,
@@ -40,38 +49,36 @@ public class Alerta
             DataCriacao = DateTime.UtcNow,
             Ativo = true
         };
-
-        return novoAlerta;
     }
 
     public static Alerta Atualizar(Alerta alerta,
                                    TipoAlerta tipoAlerta,
                                    string mensagem,
-                                   PrioridadeAlerta prioridadeAlerta)
+                                   PrioridadeAlerta prioridadeAlerta
+                                   StatusAlerta statusAlerta)
     {
         if (alerta == null)
-        {
-            throw new ArgumentNullException(nameof(alerta), "O alerta não pode ser nulo");
-        }
+            throw new ArgumentNullException(nameof(alerta));
 
-        if (string.IsNullOrEmpty(mensagem))
-        {
-            throw new ArgumentException("A mensagem não pode ser nula ou vazia", nameof(mensagem));
-        }
+        if (!alerta.Ativo)
+            throw new InvalidOperationException("Alerta inativo não pode ser atualizado");
+
+        if (string.IsNullOrWhiteSpace(mensagem))
+            throw new ArgumentException("Mensagem obrigatória", nameof(mensagem));
 
         if (!Enum.IsDefined(typeof(TipoAlerta), tipoAlerta))
-        {
-            throw new ArgumentException("Tipo de alerta inválido", nameof(tipoAlerta));
-        }
+            throw new ArgumentException("Tipo inválido", nameof(tipoAlerta));
 
         if (!Enum.IsDefined(typeof(PrioridadeAlerta), prioridadeAlerta))
-        {
-            throw new ArgumentException("Prioridade de alerta inválida", nameof(prioridadeAlerta));
-        }
+            throw new ArgumentException("Prioridade inválida", nameof(prioridadeAlerta));
+
+        if (!Enum.IsDefined(typeof(StatusAlerta), statusAlerta))
+            throw new ArgumentException("Status inválido", nameof(statusAlerta));
 
         alerta.TipoAlerta = tipoAlerta;
         alerta.Mensagem = mensagem;
         alerta.PrioridadeAlerta = prioridadeAlerta;
+        alerta.StatusAlerta = statusAlerta;
         alerta.DataAtualizacao = DateTime.UtcNow;
 
         return alerta;

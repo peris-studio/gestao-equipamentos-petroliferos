@@ -6,4 +6,4 @@ public record AlertaDto(TipoAlerta TipoAlerta,
                         PrioridadeAlerta PrioridadeAlerta,
                         Guid EquipamentoId,
                         Guid PecaId,
-                        Guid id = default);
+                        Guid Id = default);

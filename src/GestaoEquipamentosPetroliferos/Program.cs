@@ -1,44 +1,36 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Adicionando serviços ao contêiner
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "GestaoEquipamentosPetroliferos API", Version = "v1" });
+});
 
+// Configurando o DbContext com a string de conexão
+builder.Services.AddDbContext<ApplicationDbContext>();
+
+// Adicionando Health Checks
+builder.Services.AddHealthChecks();
+
+// Criando a aplicação
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "GestaoEquipamentosPetroliferos API v1");
+    c.RoutePrefix = string.Empty; // Acessar documentação na raiz ("/")
+});
 
 app.UseHttpsRedirection();
+app.UseRouting(); // Adicione esta linha para garantir que o roteamento está configurado
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.MapControllers(); // Mapeia todos os controllers
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+// Endpoint de Health Check
+app.MapHealthChecks("/healthcheck");
 
+// Iniciando a aplicação
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

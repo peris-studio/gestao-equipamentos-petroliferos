@@ -4,3 +4,5 @@ global using GestaoEquipamentosPetroliferos.Dtos;
 global using GestaoEquipamentosPetroliferos.Enums;
 global using GestaoEquipamentosPetroliferos.Mappings;
 global using GestaoEquipamentosPetroliferos.Models;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
