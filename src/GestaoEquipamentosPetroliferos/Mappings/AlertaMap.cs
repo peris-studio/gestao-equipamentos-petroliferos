@@ -15,13 +15,11 @@ public class AlertaMap : IEntityTypeConfiguration<Alerta>
               // Relacionamentos com outras entidades
               builder.HasOne(a => a.Equipamento)
                      .WithMany()
-                     .HasForeignKey(a => a.EquipamentoId)
-                     .IsRequired();
+                     .HasForeignKey(a => a.EquipamentoId);
 
               builder.HasOne(a => a.Peca)
                      .WithMany()
-                     .HasForeignKey(a => a.PecaId)
-                     .IsRequired();
+                     .HasForeignKey(a => a.PecaId);
 
               // .OnDelete(DeleteBehavior.Cascade);  // Apaga as entradas na tabela de junção ao deletar Missao
        }

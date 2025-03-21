@@ -15,8 +15,7 @@ public class ManutencaoMap : IEntityTypeConfiguration<Manutencao>
         // Relacionamentos com outras entidades
         builder.HasOne(m => m.Equipamento)
                .WithMany()
-               .HasForeignKey(m => m.EquipamentoId)
-               .IsRequired();
+               .HasForeignKey(m => m.EquipamentoId);
 
         // .OnDelete(DeleteBehavior.Cascade);  // Apaga as entradas na tabela de junção ao deletar Missao
     }

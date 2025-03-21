@@ -15,9 +15,7 @@ public class HistoricoFalhaMap : IEntityTypeConfiguration<HistoricoFalha>
               // Relacionamentos com outras entidades
               builder.HasOne(hf => hf.Equipamento)
                      .WithMany()
-                     .HasForeignKey(hf => hf.EquipamentoId)
-                     .IsRequired();
-
+                     .HasForeignKey(hf => hf.EquipamentoId);
               // .OnDelete(DeleteBehavior.Cascade);  // Apaga as entradas na tabela de junção ao deletar Missao
        }
 }
