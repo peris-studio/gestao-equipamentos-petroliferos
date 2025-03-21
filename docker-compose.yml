@@ -8,33 +8,33 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=gestao-db;Username=user;Password=password"
+      ConnectionStrings__DefaultConnection: "Host=gestao-db;Port=5432;Database=gestao-db-data;Username=user;Password=password"
     depends_on:
-      - db
+      - gestao-db
     networks:
       - gestao-network
 
-  db:
+  gestao-db:
     image: postgres
-    hostname: db # nome fixo do container dentro da rede
-    container_name: gestao-db
+    hostname: gestao-db # nome fixo do container dentro da rede
+    container_name: gestao-db-data
     restart: always # serve para reiniciar automaticamente caso pare
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - gestao-db-data:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     environment:
-      POSTGRES_DB: gestao-db
+      POSTGRES_DB: gestao-db-data
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     networks:
-      - loja-network
+      - gestao-network
 
 networks:
-  loja-network:
+  gestao-network:
     driver: bridge
 
 volumes:
-  db-data:
+  gestao-db-data:
     driver: local
