@@ -15,27 +15,17 @@ public class Peca
     public DateTime? DataDelecao { get; set; }
     public bool Ativo { get; set; }
 
-
     // M É T O D O S
-
-    public static Peca Inserir(string nome
-                               string numeracao,
-                               string descricao,
-                               FornecedorPecas fornecedorPecas,
-                               int quantidadeEstoque,
-                               decimal precoUnitario,
-                               string equipamentoCompativel,
-                               Guid id = default
-                              )
+    public static Peca Inserir(string nome,
+                                string numeracao,
+                                string descricao,
+                                FornecedorPecas fornecedorPecas,
+                                int quantidadeEstoque,
+                                decimal precoUnitario,
+                                string equipamentoCompativel,
+                                Guid id = default)
     {
-        if (string.IsNullOrWhiteSpace(nome))
-            throw new ArgumentException("Nome obrigatório", nameof(nome));
-
-        if (quantidadeEstoque < 0)
-            throw new ArgumentException("Estoque não pode ser negativo", nameof(quantidadeEstoque));
-
-        if (precoUnitario <= 0)
-            throw new ArgumentException("Preço unitário inválido", nameof(precoUnitario));
+        ValidarParametrosInsercao(nome, numeracao, fornecedorPecas, quantidadeEstoque, precoUnitario);
 
         return new Peca()
         {
@@ -53,26 +43,16 @@ public class Peca
     }
 
     public static Peca Atualizar(Peca peca,
-                                 string nome,
-                                 string descricao,
-                                 string numeracao,
-                                 FornecedorPecas fornecedorPecas,
-                                 int quantidadeEstoque,
-                                 decimal precoUnitario,
-                                 string equipamentoCompativel
-                                 )
+                                    string nome,
+                                    string descricao,
+                                    string numeracao,
+                                    FornecedorPecas fornecedorPecas,
+                                    int quantidadeEstoque,
+                                    decimal precoUnitario,
+                                    string equipamentoCompativel)
     {
-        if (peca == null)
-            throw new ArgumentNullException(nameof(peca));
-
-        if (!peca.Ativo)
-            throw new InvalidOperationException("Peça inativa não pode ser atualizada");
-
-        if (quantidadeEstoque < 0)
-            throw new ArgumentException("Estoque não pode ser negativo", nameof(quantidadeEstoque));
-
-        if (precoUnitario <= 0)
-            throw new ArgumentException("Preço unitário inválido", nameof(precoUnitario));
+        ValidarEstadoParaAtualizacao(peca);
+        ValidarParametrosAtualizacao(nome, numeracao, fornecedorPecas, quantidadeEstoque, precoUnitario);
 
         peca.Nome = nome;
         peca.Descricao = descricao;
@@ -89,7 +69,7 @@ public class Peca
     public static Peca Remover(Peca peca)
     {
         if (peca == null)
-            throw new ArgumentNullException(nameof(peca), "A peça não pode ser nula");
+            throw new ArgumentNullException(nameof(peca), "Peça não pode ser nula");
 
         if (!peca.Ativo)
             throw new InvalidOperationException("Peça já está inativa");
@@ -100,28 +80,72 @@ public class Peca
         return peca;
     }
 
-    public static bool StringParaBool(string principal)
+    // V A L I D A Ç Õ E S
+    private static void ValidarParametrosInsercao(string nome,
+                                                    string numeracao,
+                                                    FornecedorPecas fornecedorPecas,
+                                                    int quantidadeEstoque,
+                                                    decimal precoUnitario)
     {
-        return principal.ToLower() == "sim";
+        if (string.IsNullOrWhiteSpace(nome))
+            throw new ArgumentException("Nome obrigatório", nameof(nome));
+
+        if (string.IsNullOrWhiteSpace(numeracao))
+            throw new ArgumentException("Numeração obrigatória", nameof(numeracao));
+
+        if (fornecedorPecas == null)
+            throw new ArgumentNullException(nameof(fornecedorPecas), "Fornecedor obrigatório");
+
+        if (quantidadeEstoque < 0)
+            throw new ArgumentException("Estoque não pode ser negativo", nameof(quantidadeEstoque));
+
+        if (precoUnitario <= 0)
+            throw new ArgumentException("Preço unitário inválido", nameof(precoUnitario));
+    }
+
+    private static void ValidarParametrosAtualizacao(string nome,
+                                                        string numeracao,
+                                                        FornecedorPecas fornecedorPecas,
+                                                        int quantidadeEstoque,
+                                                        decimal precoUnitario)
+    {
+        if (string.IsNullOrWhiteSpace(nome))
+            throw new ArgumentException("Nome obrigatório", nameof(nome));
+
+        if (string.IsNullOrWhiteSpace(numeracao))
+            throw new ArgumentException("Numeração obrigatória", nameof(numeracao));
+
+        if (fornecedorPecas == null)
+            throw new ArgumentNullException(nameof(fornecedorPecas), "Fornecedor obrigatório");
+
+        if (quantidadeEstoque < 0)
+            throw new ArgumentException("Estoque não pode ser negativo", nameof(quantidadeEstoque));
+
+        if (precoUnitario <= 0)
+            throw new ArgumentException("Preço unitário inválido", nameof(precoUnitario));
+    }
+
+    private static void ValidarEstadoParaAtualizacao(Peca peca)
+    {
+        if (peca == null)
+            throw new ArgumentNullException(nameof(peca));
+
+        if (!peca.Ativo)
+            throw new InvalidOperationException("Peça inativa não pode ser atualizada");
     }
 
     public override string ToString()
     {
-        string principal = Principal ? "Sim" : "Não";
-        string status = Ativo ? "Ativo" : "Inativo";
-
-        return $@"
+        return @$"
                     Nome: {Nome}
-                    Descrição: {Descricao}
                     Numeração: {Numeracao}
-                    Fornecedor das Peças: {FornecedorPecas}
-                    Quantidade no Estoque: {QuantidadeEstoque}
-                    Preço Unitário: {PrecoUnitario}
-                    Equipamentos Compatíveis: {EquipamentoCompativel}
-                    Data de Criação: {DataCriacao}
-                    Data de Atualização: {DataAtualizacao}
-                    Data de Deleção: {DataDelecao}
-                    Ativo: {Ativo}
-                    ";
+                    Descrição: {Descricao ?? "Sem descrição"}
+                    Fornecedor: {FornecedorPecas}
+                    Estoque: {QuantidadeEstoque}
+                    Preço: {PrecoUnitario:C}
+                    Compatível com: {EquipamentoCompativel ?? "Nenhum"}
+                    Cadastrado em: {DataCriacao:dd/MM/yyyy HH:mm}
+                    Status: {(Ativo ? "Ativa" : "Inativa")}
+                ";
     }
 }

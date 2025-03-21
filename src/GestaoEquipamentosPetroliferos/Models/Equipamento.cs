@@ -8,7 +8,7 @@ public class Equipamento
     public FabricanteEquipamento FabricanteEquipamento { get; set; }
     public string NumeroSerie { get; set; }
     public DateOnly DataInstalacao { get; set; }
-    public DataOnly DataUltimaManutencao { get; set; }
+    public DateOnly DataUltimaManutencao { get; set; }
     public LocalizacaoEquipamento LocalizacaoEquipamento { get; set; }
     public StatusOperacionalEquipamento StatusOperacionalEquipamento { get; set; }
     public decimal CapacidadeMaxima { get; set; }
@@ -18,34 +18,24 @@ public class Equipamento
     public DateTime? DataDelecao { get; set; }
     public bool Ativo { get; set; }
 
-
     // M É T O D O S
-    public static Equipamento Inserir(string nome,
-                                      TipoEquipamento tipoEquipamento,
-                                      FabricanteEquipamento fabricanteEquipamento,
-                                      string numeroSerie,
-                                      DateOnly dataInstalacao,
-                                      DateOnly dataUltimaManutencao,
-                                      LocalizacaoEquipamento localizacaoEquipamento,
-                                      StatusOperacionalEquipamento statusOperacionalEquipamento,
-                                      decimal capacidadeMaxima,
-                                      string especificacoes,
-                                      Guid id = default
-                                    )
-    {
-        // Validações
-        if (string.IsNullOrWhiteSpace(nome))
-            throw new ArgumentException("Nome não pode ser vazio.", nameof(nome));
-        if (string.IsNullOrWhiteSpace(numeroSerie))
-            throw new ArgumentException("Número de série obrigatório", nameof(numeroSerie));
-        if (capacidadeMaxima <= 0)
-            throw new ArgumentException("Capacidade deve ser positiva.", nameof(capacidadeMaxima));
-        if (dataUltimaManutencao > DateOnly.FromDateTime(DateTime.UtcNow))
-            throw new ArgumentException("Data de manutenção não pode ser futura.", nameof(dataUltimaManutencao));
 
-        var novoEquipamento = new Equipamento()
+    public static Equipamento Inserir(string nome,
+                                        TipoEquipamento tipoEquipamento,
+                                        FabricanteEquipamento fabricanteEquipamento,
+                                        string numeroSerie,
+                                        DateOnly dataInstalacao,
+                                        DateOnly dataUltimaManutencao,
+                                        LocalizacaoEquipamento localizacaoEquipamento,
+                                        StatusOperacionalEquipamento statusOperacionalEquipamento,
+                                        decimal capacidadeMaxima,
+                                        string especificacoes,
+                                        Guid id = default)
+    {
+        return new Equipamento
         {
             Id = id == Guid.Empty ? Guid.NewGuid() : id,
+            Nome = nome,
             TipoEquipamento = tipoEquipamento,
             FabricanteEquipamento = fabricanteEquipamento,
             NumeroSerie = numeroSerie,
@@ -58,34 +48,24 @@ public class Equipamento
             DataCriacao = DateTime.UtcNow,
             Ativo = true
         };
-
-        return novoEquipamento;
     }
 
     public static Equipamento Atualizar(Equipamento equipamento,
                                         string nome,
                                         TipoEquipamento tipoEquipamento,
                                         FabricanteEquipamento fabricanteEquipamento,
+                                        string numeroSerie,
                                         DateOnly dataInstalacao,
                                         DateOnly dataUltimaManutencao,
                                         LocalizacaoEquipamento localizacaoEquipamento,
                                         StatusOperacionalEquipamento statusOperacionalEquipamento,
                                         decimal capacidadeMaxima,
-                                        string especificacoes
-                                        )
+                                        string especificacoes)
     {
-        if (equipamento == null)
-            throw new ArgumentNullException(nameof(equipamento));
-        if (!equipamento.Ativo)
-            throw new InvalidOperationException("Equipamento inativo não pode ser atualizado.");
-        if (dataUltimaManutencao > DateOnly.FromDateTime(DateTime.UtcNow))
-            throw new ArgumentException("Data de manutenção inválida.", nameof(dataUltimaManutencao));
-        if (dataUltimaManutencao > DateOnly.FromDateTime(DateTime.UtcNow))
-            throw new ArgumentException("Data futura inválida", nameof(dataUltimaManutencao));
-
         equipamento.Nome = nome;
         equipamento.TipoEquipamento = tipoEquipamento;
         equipamento.FabricanteEquipamento = fabricanteEquipamento;
+        equipamento.NumeroSerie = numeroSerie;
         equipamento.DataInstalacao = dataInstalacao;
         equipamento.DataUltimaManutencao = dataUltimaManutencao;
         equipamento.LocalizacaoEquipamento = localizacaoEquipamento;
@@ -99,10 +79,8 @@ public class Equipamento
 
     public static Equipamento Remover(Equipamento equipamento)
     {
-        if (equipamento == null)
-        {
-            throw new ArgumentNullException(nameof(equipamento), "Equipamento não pode ser nulo");
-        }
+        if (!equipamento.Ativo)
+            throw new InvalidOperationException("Equipamento já está inativo");
 
         equipamento.DataDelecao = DateTime.UtcNow;
         equipamento.Ativo = false;
@@ -110,30 +88,22 @@ public class Equipamento
         return equipamento;
     }
 
-    public static bool StringParaBool(string principal)
-    {
-        return principal.ToLower() == "sim";
-    }
-
     public override string ToString()
     {
-        string status = Ativo ? "Ativo" : "Inativo";
-
-        return $@"
+        return @$"
                     Nome: {Nome}
-                    Tipo de Equipamento: {TipoEquipamento}
+                    Tipo: {TipoEquipamento}
                     Fabricante: {FabricanteEquipamento}
-                    Número da Série: {NumeroSerie}
-                    Data de Instalação: {DataInstalacao}
-                    Data da Última Manutenção: {DataUltimaManutencao}
+                    Nº Série: {NumeroSerie}
+                    Instalação: {DataInstalacao:dd/MM/yyyy}
+                    Última Manutenção: {DataUltimaManutencao:dd/MM/yyyy}
                     Localização: {LocalizacaoEquipamento}
-                    Status Operacional do Equipamento: {StatusOperacionalEquipamento}
-                    Capacidade Máxima: {CapacidadeMaxima}
+                    Status: {StatusOperacionalEquipamento}
+                    Capacidade: {CapacidadeMaxima:N2}
                     Especificações: {Especificacoes}
-                    Data de Criação: {DataCriacao}
-                    Data de Atualização: {DataAtualizacao}
-                    Data de Deleção: {DataDelecao}
-                    Ativo: {Ativo}
+                    Criado em: {DataCriacao:dd/MM/yyyy HH:mm}
+                    Última atualização: {DataAtualizacao?.ToString("dd/MM/yyyy HH:mm") ?? "-"}
+                    Ativo: {(Ativo ? "Sim" : "Não")}
                     ";
     }
 }

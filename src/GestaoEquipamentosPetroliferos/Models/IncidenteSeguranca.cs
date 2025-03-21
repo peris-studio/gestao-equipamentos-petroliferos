@@ -21,23 +21,16 @@ public class IncidenteSeguranca
 
     // M É T O D O S
     public static IncidenteSeguranca Inserir(DateTime dataIncidente,
-                                             TipoIncidente tipoIncidente,
-                                             string descricao,
-                                             GravidadeIncidente gravidadeIncidente,
-                                             string causaRaiz,
-                                             string acaoCorretiva,
-                                             string responsavel,
-                                             DateOnly dataInvestigacao,
-                                             Guid equipamentoId,
-                                             Guid id = default
-                                            )
+                                                TipoIncidente tipoIncidente,
+                                                string descricao,
+                                                GravidadeIncidente gravidadeIncidente,
+                                                string causaRaiz,
+                                                string acaoCorretiva,
+                                                string responsavel,
+                                                DateOnly dataInvestigacao,
+                                                Guid equipamentoId,
+                                                Guid id = default)
     {
-        if (string.IsNullOrWhiteSpace(descricao))
-            throw new ArgumentException("Descrição obrigatória.", nameof(descricao));
-
-        if (dataIncidente > DateTime.UtcNow)
-            throw new ArgumentException("Data do incidente não pode ser futura.", nameof(dataIncidente));
-
         return new IncidenteSeguranca
         {
             Id = id == Guid.Empty ? Guid.NewGuid() : id,
@@ -52,86 +45,64 @@ public class IncidenteSeguranca
             EquipamentoId = equipamentoId,
             DataCriacao = DateTime.UtcNow,
             Ativo = true,
-            InvestigacaoConcluida = false
+            //InvestigacaoConcluida = ValidarConclusaoInvestigacao(causaRaiz, acaoCorretiva, dataInvestigacao)
         };
     }
 
-    public static IncidenteSeguranca Atualizar(IncidenteSeguranca incidenteSeguranca
-                                               DateTime dataIncidente,
-                                               TipoIncidente tipoIncidente,
-                                               string descricao,
-                                               GravidadeIncidente gravidadeIncidente,
-                                               string causaRaiz,
-                                               string acaoCorretiva,
-                                               string responsavel,
-                                               DateOnly dataInvestigacao
-                                              )
+    public static IncidenteSeguranca Atualizar(IncidenteSeguranca incidente,
+                                                DateTime dataIncidente,
+                                                TipoIncidente tipoIncidente,
+                                                string descricao,
+                                                GravidadeIncidente gravidadeIncidente,
+                                                string causaRaiz,
+                                                string acaoCorretiva,
+                                                string responsavel,
+                                                DateOnly dataInvestigacao)
     {
-        if (incidenteSeguranca == null)
-            throw new ArgumentNullException(nameof(incidenteSeguranca));
+        incidente.DataIncidente = dataIncidente;
+        incidente.TipoIncidente = tipoIncidente;
+        incidente.Descricao = descricao;
+        incidente.GravidadeIncidente = gravidadeIncidente;
+        incidente.CausaRaiz = causaRaiz;
+        incidente.AcaoCorretiva = acaoCorretiva;
+        incidente.Responsavel = responsavel;
+        incidente.DataInvestigacao = dataInvestigacao;
+        incidente.DataAtualizacao = DateTime.UtcNow;
+        //incidente.InvestigacaoConcluida = ValidarConclusaoInvestigacao(causaRaiz, acaoCorretiva, dataInvestigacao);
 
-        if (!incidenteSeguranca.Ativo)
-            throw new InvalidOperationException("Incidente inativo não pode ser atualizado.");
-
-        incidenteSeguranca.DataIncidente = dataIncidente;
-        incidenteSeguranca.TipoIncidente = tipoIncidente;
-        incidenteSeguranca.Descricao = descricao;
-        incidenteSeguranca.GravidadeIncidente = gravidadeIncidente;
-        incidenteSeguranca.CausaRaiz = causaRaiz;
-        incidenteSeguranca.AcaoCorretiva = acaoCorretiva;
-        incidenteSeguranca.Responsavel = responsavel;
-        incidenteSeguranca.DataInvestigacao = dataInvestigacao;
-        incidenteSeguranca.DataAtualizacao = DateTime.UtcNow;
-        incidenteSeguranca.InvestigacaoConcluida = true;
-
-        incidenteSeguranca.InvestigacaoConcluida = ValidarConclusaoInvestigacao(incidenteSeguranca.CausaRaiz,
-                                                                                incidenteSeguranca.AcaoCorretiva,
-                                                                                incidenteSeguranca.DataInvestigacao
-                                                                               );
-
-        return incidenteSeguranca;
+        return incidente;
     }
 
-    public static IncidenteSeguranca Remover(IncidenteSeguranca incidenteSeguranca)
+    public static IncidenteSeguranca Remover(IncidenteSeguranca incidente)
     {
-        incidenteSeguranca.DataDelecao = DateTime.UtcNow;
-        incidenteSeguranca.Ativo = false;
+        if (incidente == null)
+            throw new ArgumentNullException(nameof(incidente), "Incidente não pode ser nulo.");
 
-        return incidenteSeguranca;
-    }
+        if (!incidente.Ativo)
+            throw new InvalidOperationException("Incidente já está inativo");
 
-    private static bool ValidarConclusaoInvestigacao(string causaRaiz, string acaoCorretiva, DateOnly dataInvestigacao)
-    {
-        return !string.IsNullOrWhiteSpace(causaRaiz) &&
-               !string.IsNullOrWhiteSpace(acaoCorretiva) &&
-               dataInvestigacao <= DateOnly.FromDateTime(DateTime.UtcNow);
-    }
+        incidente.DataDelecao = DateTime.UtcNow;
+        incidente.Ativo = false;
 
-    public static bool StringParaBool(string principal)
-    {
-        return principal.ToLower() == "sim";
+        return incidente;
     }
 
     public override string ToString()
     {
-        string principal = Principal ? "Sim" : "Não";
-        string status = Ativo ? "Ativo" : "Inativo";
-
-        return $@"
+        return @$"
+                    [Incidente de Segurança]
                     Equipamento: {EquipamentoId}
-                    Data do Incidente: {DataIncidente}
-                    Tipo de Incidente: {TipoIncidente}
-                    Descrição: {Descricao}
+                    Data: {DataIncidente:dd/MM/yyyy HH:mm}
+                    Tipo: {TipoIncidente}
                     Gravidade: {GravidadeIncidente}
-                    Causa Raiz: {CausaRaiz}
-                    Ação Corretiva: {AcaoCorretiva}
+                    Descrição: {Descricao}
+                    Causa Raiz: {CausaRaiz ?? "Não investigada"}
+                    Ação Corretiva: {AcaoCorretiva ?? "Pendente"}
                     Responsável: {Responsavel}
-                    Data de Investigação: {DataInvestigacao}
-                    Data de Criação: {DataCriacao}
-                    Data de Atualização: {DataAtualizacao}
-                    Data de Deleção: {DataDelecao}
-                    Ativo: {Ativo}
-                    Investigação Concluída?: {InvestigacaoConcluida}
-                    ";
+                    Investigação: {DataInvestigacao:dd/MM/yyyy}
+                    Concluído: {(InvestigacaoConcluida ? "Sim" : "Não")}
+                    Status: {(Ativo ? "Ativo" : "Inativo")}
+                    Registrado em: {DataCriacao:dd/MM/yyyy HH:mm}
+                ";
     }
 }

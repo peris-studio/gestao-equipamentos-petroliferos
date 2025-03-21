@@ -9,7 +9,7 @@ public class Manutencao
     public DateOnly DataExecucao { get; set; }
     public decimal CustoManutencao { get; set; }
     public StatusManutencao StatusManutencao { get; set; }
-    public DateOnly? ProximaManutencao { get; set; }
+    public DateOnly ProximaManutencao { get; set; }
     public DateTime DataCriacao { get; set; }
     public DateTime? DataAtualizacao { get; set; }
     public DateTime? DataDelecao { get; set; }
@@ -17,37 +17,35 @@ public class Manutencao
     public Guid EquipamentoId { get; set; }
     public Equipamento Equipamento { get; set; }
 
-
     // M É T O D O S
     public static Manutencao Inserir(TipoManutencao tipoManutencao,
-                                     string descricao,
-                                     DateOnly dataAgendada,
-                                     DateOnly dataExecucao,
-                                     decimal custoManutencao,
-                                     StatusManutencao statusManutencao,
-                                     DateOnly proximaManutencao?,
-                                     Guid equipamentoId,
-                                     Guid id = default
-                                    )
+                                        string descricao,
+                                        DateOnly dataAgendada,
+                                        DateOnly dataExecucao,
+                                        decimal custoManutencao,
+                                        StatusManutencao statusManutencao,
+                                        DateOnly proximaManutencao,
+                                        Guid equipamentoId,
+                                        Guid id = default)
     {
-        if (string.IsNullOrWhiteSpace(descricao))
-            throw new ArgumentException("Descrição obrigatória", nameof(descricao));
-
-        if (dataAgendada < DateOnly.FromDateTime(DateTime.UtcNow))
-            throw new ArgumentException("Data agendada não pode ser retroativa", nameof(dataAgendada));
-
-        if (custoManutencao < 0)
-            throw new ArgumentException("Custo não pode ser negativo", nameof(custoManutencao));
+        ValidarParametrosInsercao(descricao,
+                                    dataAgendada,
+                                    custoManutencao,
+                                    equipamentoId,
+                                    tipoManutencao,
+                                    statusManutencao,
+                                    proximaManutencao);
 
         return new Manutencao()
         {
             Id = id == Guid.Empty ? Guid.NewGuid() : id,
             TipoManutencao = tipoManutencao,
+            Descricao = descricao,
             DataAgendada = dataAgendada,
             DataExecucao = dataExecucao,
             CustoManutencao = custoManutencao,
             StatusManutencao = statusManutencao,
-            ProximaManutencao = proximaManutencao ??,
+            ProximaManutencao = proximaManutencao,
             EquipamentoId = equipamentoId,
             DataCriacao = DateTime.UtcNow,
             Ativo = true
@@ -55,24 +53,22 @@ public class Manutencao
     }
 
     public static Manutencao Atualizar(Manutencao manutencao,
-                                       TipoManutencao tipoManutencao,
-                                       string descricao,
-                                       DateOnly dataAgendada,
-                                       DateOnly dataExecucao,
-                                       decimal custoManutencao,
-                                       StatusManutencao statusManutencao,
-                                       DateOnly proximaManutencao?
-                                      )
+                                        TipoManutencao tipoManutencao,
+                                        string descricao,
+                                        DateOnly dataAgendada,
+                                        DateOnly dataExecucao,
+                                        decimal custoManutencao,
+                                        StatusManutencao statusManutencao,
+                                        DateOnly proximaManutencao)
     {
-        if (manutencao == null)
-            throw new ArgumentNullException(nameof(manutencao));
-
-        if (!manutencao.Ativo)
-            throw new InvalidOperationException("Manutenção inativa não pode ser atualizada");
-
-        // Validação de consistência
-        if (statusManutencao == StatusManutencao.Concluida && dataExecucao > DateOnly.FromDateTime(DateTime.UtcNow))
-            throw new InvalidOperationException("Data de execução não pode ser futura para manutenções concluídas");
+        ValidarEstadoParaAtualizacao(manutencao);
+        ValidarParametrosAtualizacao(descricao,
+                                        dataAgendada,
+                                        dataExecucao,
+                                        custoManutencao,
+                                        statusManutencao,
+                                        tipoManutencao,
+                                        proximaManutencao);
 
         manutencao.TipoManutencao = tipoManutencao;
         manutencao.Descricao = descricao;
@@ -83,13 +79,7 @@ public class Manutencao
         manutencao.ProximaManutencao = proximaManutencao;
         manutencao.DataAtualizacao = DateTime.UtcNow;
 
-        // Regra para próxima manutenção obrigatória
-        if (manutencao.TipoManutencao == TipoManutencao.Preventiva &&
-            manutencao.StatusManutencao == StatusManutencao.Concluida &&
-            !manutencao.ProximaManutencao.HasValue)
-        {
-            throw new InvalidOperationException("Próxima manutenção é obrigatória para preventivas concluídas");
-        }
+        ValidarRegraProximaManutencao(manutencao);
 
         return manutencao;
     }
@@ -97,7 +87,7 @@ public class Manutencao
     public static Manutencao Remover(Manutencao manutencao)
     {
         if (manutencao == null)
-            throw new ArgumentNullException(nameof(manutencao), "A manutenção não pode ser nula");
+            throw new ArgumentNullException(nameof(manutencao), "Manutenção não pode ser nula");
 
         if (!manutencao.Ativo)
             throw new InvalidOperationException("Manutenção já está inativa");
@@ -108,30 +98,93 @@ public class Manutencao
         return manutencao;
     }
 
-    public static bool StringParaBool(string principal)
+    // V A L I D A Ç Ã O
+    private static void ValidarParametrosInsercao(string descricao,
+                                                    DateOnly dataAgendada,
+                                                    decimal custoManutencao,
+                                                    Guid equipamentoId,
+                                                    TipoManutencao tipoManutencao,
+                                                    StatusManutencao statusManutencao,
+                                                    DateOnly proximaManutencao)
     {
-        return principal.ToLower() == "sim";
+        if (string.IsNullOrWhiteSpace(descricao))
+            throw new ArgumentException("Descrição obrigatória", nameof(descricao));
+
+        if (dataAgendada < DateOnly.FromDateTime(DateTime.UtcNow))
+            throw new ArgumentException("Data agendada não pode ser retroativa", nameof(dataAgendada));
+
+        if (custoManutencao < 0)
+            throw new ArgumentException("Custo não pode ser negativo", nameof(custoManutencao));
+
+        if (equipamentoId == Guid.Empty)
+            throw new ArgumentException("Equipamento inválido", nameof(equipamentoId));
+
+        if (tipoManutencao == TipoManutencao.Preventiva && statusManutencao == StatusManutencao.Concluida)
+        {
+            if (proximaManutencao == DateOnly.MinValue)
+                throw new ArgumentException("Próxima manutenção obrigatória para preventivas concluídas", nameof(proximaManutencao));
+        }
+    }
+
+    private static void ValidarParametrosAtualizacao(string descricao,
+                                                        DateOnly dataAgendada,
+                                                        DateOnly dataExecucao,
+                                                        decimal custoManutencao,
+                                                        StatusManutencao statusManutencao,
+                                                        TipoManutencao tipoManutencao,
+                                                        DateOnly proximaManutencao)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+            throw new ArgumentException("Descrição obrigatória", nameof(descricao));
+
+        if (dataAgendada < DateOnly.FromDateTime(DateTime.UtcNow))
+            throw new ArgumentException("Data agendada não pode ser retroativa", nameof(dataAgendada));
+
+        if (dataExecucao > DateOnly.FromDateTime(DateTime.UtcNow))
+            throw new ArgumentException("Data de execução não pode ser futura", nameof(dataExecucao));
+
+        if (custoManutencao < 0)
+            throw new ArgumentException("Custo não pode ser negativo", nameof(custoManutencao));
+
+        if (!Enum.IsDefined(typeof(TipoManutencao), tipoManutencao))
+            throw new ArgumentException("Tipo de manutenção inválido");
+
+        if (!Enum.IsDefined(typeof(StatusManutencao), statusManutencao))
+            throw new ArgumentException("Status de manutenção inválido");
+    }
+
+    private static void ValidarEstadoParaAtualizacao(Manutencao manutencao)
+    {
+        if (manutencao == null)
+            throw new ArgumentNullException(nameof(manutencao));
+
+        if (!manutencao.Ativo)
+            throw new InvalidOperationException("Manutenção inativa não pode ser atualizada");
+    }
+
+    private static void ValidarRegraProximaManutencao(Manutencao manutencao)
+    {
+        if (manutencao.TipoManutencao == TipoManutencao.Preventiva &&
+            manutencao.StatusManutencao == StatusManutencao.Concluida &&
+            manutencao.ProximaManutencao == DateOnly.MinValue)
+        {
+            throw new InvalidOperationException("Próxima manutenção é obrigatória para preventivas concluídas");
+        }
     }
 
     public override string ToString()
     {
-        string principal = Principal ? "Sim" : "Não";
-        string status = Ativo ? "Ativo" : "Inativo";
-
-        return $@"
-                    Tipo de Manutencao: {TipoManutencao}
-                    Descricao: {Descricao}
-                    Data Agendada: {DataAgendada}
-                    Data de Execução: {DataExecucao}
-                    Responsável {Responsavel}
-                    Custo da Manutenção: {CustoManutencao}
-                    Status da Manutenção: {StatusManutencao}
-                    Próxima Manutenção: {ProximaManutencao}
-                    Equipamentos: {EquipamentoId}
-                    Data de Criação: {DataCriacao}
-                    Data de Atualização: {DataAtualizacao}
-                    Data de Deleção: {DataDelecao}
-                    Ativo: {Ativo}
-                    ";
+        return @$"
+                    Tipo: {TipoManutencao}
+                    Descrição: {Descricao}
+                    Agendada: {DataAgendada:dd/MM/yyyy}
+                    Execução: {DataExecucao:dd/MM/yyyy}
+                    Custo: {CustoManutencao:C}
+                    Status: {StatusManutencao}
+                    Próxima: {ProximaManutencao:dd/MM/yyyy}
+                    Equipamento: {EquipamentoId}
+                    Criada em: {DataCriacao:dd/MM/yyyy HH:mm}
+                    Ativa: {(Ativo ? "Sim" : "Não")}
+            ";
     }
 }
