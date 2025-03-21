@@ -30,14 +30,14 @@ INSERT INTO public."Equipamentos" ("Id",
                                    "DataCriacao",
                                    "Ativo") VALUES 
 (
-    '',
+    'd622734e-f6e1-4f75-bff6-a8e3f9c5e9aa',
     'Bomba Centrífuga XPTO-3000',
     0,  -- Valor correspondente a TipoEquipamento.BombaCentrifuga
-    2,  -- Valor correspondente a FabricanteEquipamento.IndustriasACME
+    2,  -- Valor correspondente a FabricanteEquipamento.BakerHughes
     'SN-ACME-2024-001',
     '2024-01-15',
     '2024-06-01',
-    1,  -- Valor correspondente a LocalizacaoEquipamento.PlataformaMaritimaB
+    0,  -- Valor correspondente a LocalizacaoEquipamento.PlataformaMaritima
     0,  -- Valor correspondente a StatusOperacionalEquipamento.Operacional
     1500.50,
     'Bomba de alta pressão com revestimento anticorrosivo',
@@ -45,15 +45,15 @@ INSERT INTO public."Equipamentos" ("Id",
     TRUE
 ),
 (
-    '',
+    '247ef7c3-f5b3-4b7f-81d7-117047e27bd4',
     'Válvula de Controle VMAX',
-    2,  -- Valor correspondente a TipoEquipamento.ValvulaControle
-    1,  -- Valor correspondente a FabricanteEquipamento.PetroTech
+    1,  -- Valor correspondente a TipoEquipamento.ValvulaControle
+    8,  -- Valor correspondente a FabricanteEquipamento.Petrobras
     'SN-PT-2023-045',
     '2023-11-20',
     '2024-05-15',
-    1,  -- Valor correspondente a LocalizacaoEquipamento.RefinariaNordeste
-    1,  -- Valor correspondente a StatusOperacionalEquipamento.EmManutencao
+    1,  -- Valor correspondente a LocalizacaoEquipamento.Refinaria
+    1,  -- Valor correspondente a StatusOperacionalEquipamento.EmManutencaoPreventiva
     500.00,
     'Válvula reguladora de fluxo para alta vazão',
     CURRENT_TIMESTAMP,

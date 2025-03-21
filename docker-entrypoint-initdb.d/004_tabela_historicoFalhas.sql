@@ -4,7 +4,7 @@ CREATE TABLE public."HistoricoFalhas" (
     "Descricao" TEXT NOT NULL,
     "CausaProvavel" TEXT NOT NULL,
     "AcaoCorretiva" TEXT NOT NULL,
-    "TempoParado" INTERVAL NOT NULL,
+    "TempoParado" TIMESTAMP NOT NULL,
     "Responsavel" VARCHAR(100) NOT NULL,              
     "DataCriacao" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "DataAtualizacao" TIMESTAMP,
@@ -14,7 +14,6 @@ CREATE TABLE public."HistoricoFalhas" (
     CONSTRAINT "FK_Equipamentos" FOREIGN KEY ("EquipamentoId") REFERENCES public."Equipamentos"("Id")
 );
 
--- Exemplo de inserção
 INSERT INTO public."HistoricoFalhas" (  "Id",
                                         "DataFalha",
                                         "Descricao",
@@ -22,34 +21,31 @@ INSERT INTO public."HistoricoFalhas" (  "Id",
                                         "AcaoCorretiva",
                                         "TempoParado",
                                         "Responsavel",
-                                        "EquipamentoId",
                                         "DataCriacao",
                                         "Ativo",
                                         "EquipamentoId") 
 VALUES 
 (
-    '',
-    '2024-05-15 14:30:00',
+    'd37298b7-ccf7-4589-928a-1a84842ab2c4',
+    CURRENT_TIMESTAMP,
     'Vazamento no selo mecânico',
     'Desgaste por fadiga do material',
     'Substituição do selo e lubrificação',
-    '2 horas 30 minutos',  
+    CURRENT_TIMESTAMP,
     'Eng. João Silva',
-    '',  -- ID de um equipamento existente
     CURRENT_TIMESTAMP,
     TRUE,
-    ''
+    'd622734e-f6e1-4f75-bff6-a8e3f9c5e9aa' -- ID de um equipamento
 ),
 (
-    '',
-    '2024-06-01 09:15:00',
-    'Superaquecimento do motor',
+    '5998810b-0807-4266-8867-016ad2e685d5',
+    CURRENT_TIMESTAMP,
+    'Superaquecimento da válvula',
     'Falha no sistema de refrigeração',
     'Limpeza das aletas e troca do fluido',
-    '8:00:00',  -- Formato ISO (8 horas)
+    CURRENT_TIMESTAMP,
     'Técnica Maria Oliveira',
-    '',  -- ID de outro equipamento
     CURRENT_TIMESTAMP,
     TRUE,
-    ''
+    '247ef7c3-f5b3-4b7f-81d7-117047e27bd4' -- ID Equipamento
 );
