@@ -1,6 +1,7 @@
 namespace GestaoEquipamentosPetroliferos.Dtos;
 
-public record IncidenteSegurancaDto(DateTime TipoIncidente,
+public record IncidenteSegurancaDto(DateTime DataIncidente,
+                                    TipoIncidente TipoIncidente,
                                     string Descricao,
                                     GravidadeIncidente GravidadeIncidente,
                                     string CausaRaiz,
