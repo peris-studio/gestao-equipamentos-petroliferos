@@ -11,6 +11,5 @@ public enum FornecedorPecas
     Weatherford,
     Petrobras,
     Equinor,
-    Outro,
-    NaoIdentificado
+    Outro
 }
