@@ -2,6 +2,7 @@ namespace GestaoEquipamentosPetroliferos.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+
 public class AlertaController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -60,29 +61,27 @@ public class AlertaController : ControllerBase
         }
     }
 
-    // GET: api/Alerta/obter-por-id/5
+    // GET: api/Alerta/obter-por-id
     [HttpGet("obter-por-id/{id}")]
     public async Task<IActionResult> ObterPorId(Guid id)
     {
         if (id == Guid.Empty)
             return BadRequest("ID inválido");
 
-        var alerta = await _context.Alertas.FindAsync(id);
+        var alerta = await _context.Alertas
+                                   .AsNoTracking()
+                                   .FirstOrDefaultAsync(a => a.Id == id);
 
         if (alerta == null || !alerta.Ativo)
             return NotFound("Alerta não encontrado");
 
-        var alertaDto = new AlertaDto(alerta.Id,
-                                        alerta.TipoAlerta,
+        var alertaDto = new AlertaDto(alerta.TipoAlerta,
                                         alerta.Mensagem,
                                         alerta.StatusAlerta,
                                         alerta.PrioridadeAlerta,
                                         alerta.EquipamentoId,
                                         alerta.PecaId,
-                                        alerta.DataCriacao,
-                                        alerta.DataAtualizacao,
-                                        alerta.DataDelecao,
-                                        alerta.Ativo
+                                        alerta.Id
         );
 
         return Ok(alertaDto);
@@ -94,23 +93,19 @@ public class AlertaController : ControllerBase
     {
         var alertas = await _context.Alertas.Where(a => a.Ativo).ToListAsync();
 
-        var alertasDto = alertas.Select(a => new AlertaDto(a.Id,
-                                                            a.TipoAlerta,
+        var alertasDto = alertas.Select(a => new AlertaDto(a.TipoAlerta,
                                                             a.Mensagem,
                                                             a.StatusAlerta,
                                                             a.PrioridadeAlerta,
                                                             a.EquipamentoId,
                                                             a.PecaId,
-                                                            a.DataCriacao,
-                                                            a.DataAtualizacao,
-                                                            a.DataDelecao,
-                                                            a.Ativo
+                                                            a.Id
         )).ToList();
 
         return Ok(alertasDto);
     }
 
-    // PATCH: api/Alerta/atualizar/5
+    // PATCH: api/Alerta/atualizar
     [HttpPatch("atualizar/{id}")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] AlertaDto alertaDto)
     {
@@ -145,7 +140,7 @@ public class AlertaController : ControllerBase
         }
     }
 
-    // DELETE: api/Alerta/remover/5
+    // DELETE: api/Alerta/remover
     [HttpDelete("remover/{id}")]
     public async Task<IActionResult> Remover(Guid id)
     {
@@ -158,5 +153,21 @@ public class AlertaController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
+    }
+}
+
+[Serializable]
+internal class DbUpdateException : Exception
+{
+    public DbUpdateException()
+    {
+    }
+
+    public DbUpdateException(string? message) : base(message)
+    {
+    }
+
+    public DbUpdateException(string? message, Exception? innerException) : base(message, innerException)
+    {
     }
 }
