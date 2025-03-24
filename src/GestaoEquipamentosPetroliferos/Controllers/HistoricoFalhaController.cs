@@ -76,7 +76,7 @@ public class HistoricoFalhaController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { title = "Erro interno", detail = ex.Message });
+            return StatusCode(500, new { title = "Erro interno", detail = ex.Message, exception = ex.ToString() });
         }
     }
 

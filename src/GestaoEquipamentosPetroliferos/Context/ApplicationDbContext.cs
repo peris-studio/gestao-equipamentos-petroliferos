@@ -53,9 +53,4 @@ public class ApplicationDbContext : DbContext
     {
         return await base.SaveChangesAsync(cancellationToken) > 0;
     }
-
-    internal async Task SaveChangesAsync()
-    {
-        throw new NotImplementedException();
-    }
 }
