@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+
 LABEL maintainer="Hisllaylla Kézia"
 WORKDIR /app
 EXPOSE 8080
