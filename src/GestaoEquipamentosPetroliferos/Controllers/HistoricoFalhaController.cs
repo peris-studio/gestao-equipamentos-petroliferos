@@ -112,7 +112,7 @@ public class HistoricoFalhaController : ControllerBase
     public async Task<IActionResult> Listar()
     {
 
-        var historicoFalhas = await _context.HistoricoFalhas.Where(h => h.Ativo).ToListAsync();
+        var historicoFalhas = await _context.HistoricoFalhas.ToListAsync();
 
         var historicoFalhasDto = historicoFalhas.Select(h => new HistoricoFalhaDto(h.DataFalha,
                                                                                     h.Descricao,
@@ -165,7 +165,10 @@ public class HistoricoFalhaController : ControllerBase
     public async Task<IActionResult> Remover(Guid id)
     {
         var historicoFalha = await _context.HistoricoFalhas.FindAsync(id);
-        
+
+        if (historicoFalha == null)
+            return NotFound("Histórico de falha não encontrado");
+
         HistoricoFalha.Remover(historicoFalha);
         await _context.SaveChangesAsync();
 

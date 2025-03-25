@@ -76,6 +76,9 @@ public class EquipamentoController : ControllerBase
 
         var equipamento = await _context.Equipamentos.FindAsync(id);
 
+        if (equipamento == null)
+            return NotFound("Equipamento não encontrado");
+
         var equipamentoDto = new EquipamentoDto(equipamento.Nome,
                                                 equipamento.TipoEquipamento,
                                                 equipamento.FabricanteEquipamento,
@@ -96,6 +99,8 @@ public class EquipamentoController : ControllerBase
     [HttpGet("listar")]
     public async Task<IActionResult> Listar()
     {
+        var equipamentos = await _context.Equipamentos.ToListAsync();
+
         var equipamentosDto = equipamentos.Select(e => new EquipamentoDto(e.Nome,
                                                                             e.TipoEquipamento,
                                                                             e.FabricanteEquipamento,
@@ -158,6 +163,9 @@ public class EquipamentoController : ControllerBase
     public async Task<IActionResult> Remover(Guid id)
     {
         var equipamento = await _context.Equipamentos.FindAsync(id);
+
+        if (equipamento == null)
+            return NotFound("Equipamento não encontrado");
 
         Equipamento.Remover(equipamento);
         await _context.SaveChangesAsync();

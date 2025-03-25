@@ -74,7 +74,12 @@ public class ManutencaoController : ControllerBase
     {
         if (id == Guid.Empty)
             return BadRequest("ID inválido");
-            
+
+        var manutencao = await _context.Manutencoes.FindAsync(id);
+
+        if (manutencao == null)
+            return NotFound("Manutenção não encontrada");
+
         var manutencaoDto = new ManutencaoDto(manutencao.TipoManutencao,
                                                 manutencao.Descricao,
                                                 manutencao.DataAgendada,
@@ -93,7 +98,7 @@ public class ManutencaoController : ControllerBase
     [HttpGet("listar")]
     public async Task<IActionResult> Listar()
     {
-        var manutencoes = await _context.Manutencoes.Where(m => m.Ativo).ToListAsync();
+        var manutencoes = await _context.Manutencoes.ToListAsync();
 
         var manutencoesDto = manutencoes.Select(m => new ManutencaoDto(m.TipoManutencao,
                                                                         m.Descricao,
@@ -115,6 +120,8 @@ public class ManutencaoController : ControllerBase
     {
         try
         {
+            var manutencao = await _context.Manutencoes.FindAsync(id);
+
             if (manutencao == null)
                 return NotFound("Manutenção não encontrada");
 
@@ -149,7 +156,9 @@ public class ManutencaoController : ControllerBase
     [HttpDelete("remover/{id}")]
     public async Task<IActionResult> Remover(Guid id)
     {
-        if (manutencao == null || !manutencao.Ativo)
+        var manutencao = await _context.Manutencoes.FindAsync(id);
+
+        if (manutencao == null)
             return NotFound("Manutenção não encontrada");
 
         Manutencao.Remover(manutencao);

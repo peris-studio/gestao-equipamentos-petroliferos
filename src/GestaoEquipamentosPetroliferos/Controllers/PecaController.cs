@@ -75,7 +75,7 @@ public class PecaController : ControllerBase
 
         var peca = await _context.Pecas.FindAsync(id);
 
-        if (peca == null || !peca.Ativo)
+        if (peca == null)
             return NotFound("Peça não encontrada");
 
         var pecaDto = new PecaDto(peca.Nome,
@@ -95,6 +95,8 @@ public class PecaController : ControllerBase
     [HttpGet("listar")]
     public async Task<IActionResult> Listar()
     {
+        var pecas = await _context.Pecas.ToListAsync();
+
         var pecasDto = pecas.Select(p => new PecaDto(p.Nome,
                                                         p.Descricao,
                                                         p.Numeracao,
@@ -152,7 +154,7 @@ public class PecaController : ControllerBase
     {
         var peca = await _context.Pecas.FindAsync(id);
 
-        if (peca == null || !peca.Ativo)
+        if (peca == null)
             return NotFound("Peça não encontrada");
 
         Peca.Remover(peca);

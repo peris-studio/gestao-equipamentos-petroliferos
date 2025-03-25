@@ -72,7 +72,7 @@ public class AlertaController : ControllerBase
                                    .AsNoTracking()
                                    .FirstOrDefaultAsync(a => a.Id == id);
 
-        if (alerta == null || !alerta.Ativo)
+        if (alerta == null)
             return NotFound("Alerta não encontrado");
 
         var alertaDto = new AlertaDto(alerta.TipoAlerta,
@@ -91,6 +91,8 @@ public class AlertaController : ControllerBase
     [HttpGet("listar")]
     public async Task<IActionResult> Listar()
     {
+        var alertas = await _context.Alertas.ToListAsync();
+
         var alertasDto = alertas.Select(a => new AlertaDto(a.TipoAlerta,
                                                             a.Mensagem,
                                                             a.StatusAlerta,
@@ -110,10 +112,10 @@ public class AlertaController : ControllerBase
         try
         {
             var alerta = await _context.Alertas.FindAsync(id);
-
+            
             if (alerta == null)
                 return NotFound("Alerta não encontrado");
-
+                
             if (alertaDto.Id != id)
                 return BadRequest("ID não pode ser alterado");
 
@@ -144,7 +146,7 @@ public class AlertaController : ControllerBase
     {
         var alerta = await _context.Alertas.FindAsync(id);
 
-        if (alerta == null || !alerta.Ativo)
+        if (alerta == null)
             return NotFound("Alerta não encontrado");
 
         Alerta.Remover(alerta);
