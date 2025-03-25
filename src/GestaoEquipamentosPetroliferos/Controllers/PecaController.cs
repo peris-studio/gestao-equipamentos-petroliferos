@@ -95,8 +95,6 @@ public class PecaController : ControllerBase
     [HttpGet("listar")]
     public async Task<IActionResult> Listar()
     {
-        var pecas = await _context.Pecas.Where(p => p.Ativo).ToListAsync();
-
         var pecasDto = pecas.Select(p => new PecaDto(p.Nome,
                                                         p.Descricao,
                                                         p.Numeracao,

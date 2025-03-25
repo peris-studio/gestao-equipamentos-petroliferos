@@ -95,8 +95,6 @@ public class IncidenteSegurancaController : ControllerBase
     [HttpGet("listar")]
     public async Task<IActionResult> Listar()
     {
-        var incidentesSeguranca = await _context.IncidentesSeguranca.Where(i => i.Ativo).ToListAsync();
-
         var incidentesSegurancaDto = incidentesSeguranca.Select(i => new IncidenteSegurancaDto(i.DataIncidente,
                                                                                                 i.TipoIncidente,
                                                                                                 i.Descricao,
@@ -156,9 +154,6 @@ public class IncidenteSegurancaController : ControllerBase
     public async Task<IActionResult> Remover(Guid id)
     {
         var incidenteSeguranca = await _context.IncidentesSeguranca.FindAsync(id);
-
-        if (incidenteSeguranca == null || !incidenteSeguranca.Ativo)
-            return NotFound("Incidente de segurança não encontrado");
 
         IncidenteSeguranca.Remover(incidenteSeguranca);
         await _context.SaveChangesAsync();

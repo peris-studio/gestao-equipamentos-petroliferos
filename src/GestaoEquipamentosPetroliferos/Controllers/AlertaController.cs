@@ -91,8 +91,6 @@ public class AlertaController : ControllerBase
     [HttpGet("listar")]
     public async Task<IActionResult> Listar()
     {
-        var alertas = await _context.Alertas.Where(a => a.Ativo).ToListAsync();
-
         var alertasDto = alertas.Select(a => new AlertaDto(a.TipoAlerta,
                                                             a.Mensagem,
                                                             a.StatusAlerta,
@@ -153,21 +151,5 @@ public class AlertaController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent();
-    }
-}
-
-[Serializable]
-internal class DbUpdateException : Exception
-{
-    public DbUpdateException()
-    {
-    }
-
-    public DbUpdateException(string? message) : base(message)
-    {
-    }
-
-    public DbUpdateException(string? message, Exception? innerException) : base(message, innerException)
-    {
     }
 }

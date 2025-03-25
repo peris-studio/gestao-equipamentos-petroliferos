@@ -165,10 +165,7 @@ public class HistoricoFalhaController : ControllerBase
     public async Task<IActionResult> Remover(Guid id)
     {
         var historicoFalha = await _context.HistoricoFalhas.FindAsync(id);
-
-        if (historicoFalha == null || !historicoFalha.Ativo)
-            return NotFound("Histórico de falha não encontrado");
-
+        
         HistoricoFalha.Remover(historicoFalha);
         await _context.SaveChangesAsync();
 
