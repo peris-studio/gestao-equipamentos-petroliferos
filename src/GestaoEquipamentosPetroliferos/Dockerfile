@@ -1,5 +1,4 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-
 LABEL maintainer="Hisllaylla Kézia"
 WORKDIR /app
 EXPOSE 8080
@@ -8,7 +7,7 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copiar o arquivo de projeto e restaurar dependências
+# Copiar o arquivo de projeto e restaurar as dependências
 COPY src/GestaoEquipamentosPetroliferos/GestaoEquipamentosPetroliferos.csproj GestaoEquipamentosPetroliferos/
 RUN dotnet restore "GestaoEquipamentosPetroliferos/GestaoEquipamentosPetroliferos.csproj"
 
@@ -19,7 +18,7 @@ COPY src .
 WORKDIR "/src/GestaoEquipamentosPetroliferos"
 RUN dotnet build "GestaoEquipamentosPetroliferos.csproj" -c Release -o /app/build
 
-# Etapa de publicação
+# Etapa de publicação: publicar a aplicação para produção
 FROM build AS publish
 RUN dotnet publish "GestaoEquipamentosPetroliferos.csproj" -c Release -o /app/publish
 
