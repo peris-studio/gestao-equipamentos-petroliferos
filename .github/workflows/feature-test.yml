@@ -1,0 +1,47 @@
+name: Feature Test Pipeline
+
+on:
+  push:
+    branches-ignore:
+      - main # Roda em qualquer branch, menos a main
+  workflow_dispatch:
+
+jobs:
+  setup-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Build Application
+        run: dotnet build --configuration Release --no-restore
+
+  container-test:
+    needs: setup-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Build and Run Docker Container
+        run: |
+          docker build -t gestao-ep:latest -f src/GestaoEquipamentosPetroliferos/Dockerfile .
+          docker run -d -p 8080:8080 --name gestao-ep gestao-ep:latest
+          sleep 10
+      - name: Test Healthcheck Endpoint
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/healthcheck)
+          if [ "$STATUS" -ne 200 ]; then
+            echo "Healthcheck failed with status $STATUS"
+            exit 1
+          fi
+          echo "Healthcheck passed with status $STATUS"
+      - name: Cleanup
+        run: docker stop gestao-ep && docker rm gestao-ep
